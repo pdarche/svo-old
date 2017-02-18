@@ -1,0 +1,16 @@
+{
+  "name": "svo",
+  "version": "1.0.0",
+  "description": "Social Value Orientation slider",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "next"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "d3": "^4.5.0",
+    "next": "^1.2.3"
+  }
+}
