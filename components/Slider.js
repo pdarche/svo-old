@@ -5,21 +5,17 @@ import css from 'next/css'
 export default class Slider extends React.Component {
   constructor(props){
     super(props);
-    this.state = {
-      min1: props.scales.min1,
-      max1: props.scales.max1,
-      min2: props.scales.min2,
-      max2: props.scales.max2
+  }
+  
+  componentDidUpdate() {
+    if (this.props.reset) {
+      d3.select('.slider-container').remove()
+      this._create(this.props)
     }
   }
   
   componentDidMount(){
-    this._create()
-  }
-
-  handleChange(ev) {
-    console.log('changing', ev)
-    // this._update()
+    this._create(this.props)
   }
 
   _createLabel(slider, x, y, text) {
@@ -30,8 +26,8 @@ export default class Slider extends React.Component {
       .text(text)
   }
 
-  _create() {
-    let svg = d3.select("svg");
+  _create(props) {
+    let svg = d3.select(".slider-component");
     let dims = this._dims(this.props)
     let scales = this._scales(dims)
 
@@ -44,17 +40,18 @@ export default class Slider extends React.Component {
       .attr("transform", "translate(50, 0)")
 
     this._createLabel(sliderContainer, 0, -13, "You receive")
-    this._createLabel(sliderContainer, 0, 17, "They receive")
+    this._createLabel(sliderContainer, 0, 17, "Others receive")
 
-    this._createLabel(slider, 0, -13, this.state.min1)
-    this._createLabel(slider, dims.width, -13, this.state.max1)
-    this._createLabel(slider, 0, 19, this.state.min2)
-    this._createLabel(slider, dims.width, 19, this.state.max2)
+    this._createLabel(slider, 0, -13, props.scales.min1)
+    this._createLabel(slider, dims.width, -13, props.scales.max1)
+    this._createLabel(slider, 0, 19, props.scales.min2)
+    this._createLabel(slider, dims.width, 19, props.scales.max2)
 
-    this._update(slider, scales, dims, this.props, this.state)
+    this._update(slider, scales, dims, props)
   }
 
-  _update(slider, scales, dims, props, state) {
+  _update(slider, scales, dims, props) {
+    var _this = this;
     slider.append("line")
        .attr("class", "track")
        .attr("x1", scales.x1.range()[0])
@@ -70,6 +67,7 @@ export default class Slider extends React.Component {
              handleGroup.attr("transform", "translate(" + scales.x1(d1) + ",0)");
              text1.text(Math.round(d1))
              text2.text(Math.round(d2))
+             _this.props.handleSlide([Math.round(d1), Math.round(d2)])
           }));
 
     slider.insert("g", ".track-overlay")
@@ -78,7 +76,7 @@ export default class Slider extends React.Component {
 
     let handleGroup = slider.insert("g", ".track-overlay") 
       .attr("class", "handle-group")
-      .attr("transform", "translate(" + scales.x1(25) + ",0)");
+      .attr("transform", "translate(" + scales.x1(props.data[0]) + ",0)");
         
     let handle = handleGroup.append("circle") 
       .attr("class", "handle")
@@ -87,22 +85,22 @@ export default class Slider extends React.Component {
     let text1 = handleGroup.append("text")
       .attr("class", "label")
       .attr("y", -13)
-      .text(this.state.max1/2)
+      .text(props.data[0])
 
     let text2 = handleGroup.append("text")
       .attr("class", "label")
       .attr("y", 20)
-      .text(this.state.max2/2)
+      .text(props.data[1])
   }
   
   _scales(dims) {
     let x1 = d3.scaleLinear()
-      .domain([this.state.min1, this.state.max1])
+      .domain([this.props.scales.min1, this.props.scales.max1])
       .range([0, dims.width])
       .clamp(true);
 
     let x2 = d3.scaleLinear()
-      .domain([this.state.min2, this.state.max2])
+      .domain([this.props.scales.min2, this.props.scales.max2])
       .range([0, dims.width])
       .clamp(true);
 
@@ -121,13 +119,15 @@ export default class Slider extends React.Component {
   render(){
     return (
       <div {...container}>
-        <svg width={this.props.width} height={this.props.height}></svg>
+        <svg className={'slider-component'} width={this.props.width} height={this.props.height}></svg>
       </div>
     )
   }
 }
 
 const container = css({
+  display: 'flex',
+  justifyContent: 'center',
   '& .ticks, .label': {
     font: '10px sans-serif',
     textAnchor: 'middle'
