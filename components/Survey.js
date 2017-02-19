@@ -41,7 +41,22 @@ export default class Survey extends React.Component {
   componentDidUpdate() {
     if (this.state.surveyComplete) {
       let svo = this.computeSVO(this.state.selfTotal, this.state.otherTotal) 
-      alert('the svo is', svo)
+      let type = this.classifySVO(svo)
+      window.localStorage.setItem('svo', svo)
+      window.localStorage.setItem('type', type)
+      window.location = '/results'
+    }
+  }
+
+  classifySVO(svo) {
+    if (svo > 22.45 && svo <= 57.15) {
+      return 'prosocial'
+    } else if (svo > -12.04 && svo <= 22.45) {
+      return 'individualist'
+    } else if (svo > 57.15) {
+      return 'altruist'
+    } else if (svo <= -12.04) {
+      return 'competitive'
     }
   }
 
