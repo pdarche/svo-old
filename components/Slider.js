@@ -109,11 +109,10 @@ export default class Slider extends React.Component {
 
   _dims(props) {
     let margin = {right: 50, left: 60},
-      width = props.width - margin.left - margin.right - 75,
-      height = props.height,
-      offset = 75
+      width = props.width - margin.left - margin.right - 50,
+      height = props.height
 
-    return { margin, width, height, offset }
+    return { margin, width, height }
   }
 
   render(){
@@ -128,7 +127,7 @@ export default class Slider extends React.Component {
 const container = css({
   display: 'flex',
   justifyContent: 'center',
-  margin: '20px',
+  margin: '20px 0px',
   '& .ticks, .label': {
     font: '16px sans-serif',
     textAnchor: 'middle'

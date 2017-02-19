@@ -87,42 +87,51 @@ export default class Survey extends React.Component {
 
   render(){
     return (
-      <div {...container}>
-        <Status n={this.state.question + 1}/>
-        <div {...labels}>
-          <Label data={this.state.data} />
-          <Bar width={200} height={96} data={this.state.data}/>
+      <div {...styles}>
+        <div {...container}>
+          <Status n={this.state.question + 1}/>
+          <div {...labels}>
+            <Label data={this.state.data} />
+            <Bar width={200} height={96} data={this.state.data}/>
+          </div>
+          <Slider 
+            width={500}
+            height={100}
+            data={this.state.data}
+            scales={this.state.ranges}
+            reset={this.state.reset}
+            handleSlide={(val) => {this.onSlide(val)}}
+          />
+          <button onClick={(ev) => {this.handleClick(ev)}}>Submit</button>
         </div>
-        <Slider 
-          width={700}
-          height={100}
-          data={this.state.data}
-          scales={this.state.ranges}
-          reset={this.state.reset}
-          handleSlide={(val) => {this.onSlide(val)}}
-        />
-        <button onClick={(ev) => {this.handleClick(ev)}}>Submit</button>
       </div>
     )
   }
 }
+
+const styles = css({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '90vh'
+});
 
 const container = css({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
-  height: '400px',
   width: '960px',
-  margin: '0px auto',
+  height: '500px',
   padding: '40px',
-  border: '1px solid #ccc',
+  // border: '1px solid #ccc',
   '& button': {
     border: '1px solid #333',
     width: '140px',
-    height: '50px',
+    height: '30px',
     backgroundColor: 'white',
-    margin: '40px 0px 20px 0px'
+    // margin: '40px 0px 20px 0px'
   },
   '& button:hover': {
     backgroundColor: '#ccc',
@@ -135,7 +144,7 @@ const labels = css({
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'center',
-  margin: '20px 0px'
+  margin: '10px 0px'
 });
 
 
