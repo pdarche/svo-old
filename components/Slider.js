@@ -10,7 +10,7 @@ export default class Slider extends React.Component {
   componentDidUpdate() {
     if (this.props.reset) {
       d3.select('.slider-container').remove()
-      this._create(this.props)
+     this._create(this.props)
     }
   }
   

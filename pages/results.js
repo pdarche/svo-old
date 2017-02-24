@@ -1,6 +1,6 @@
 import React from 'react'
 import css from 'next/css'
-import Survey from '../components/Survey'
+import Results from '../components/Results'
 
 export default class SurveyPage extends React.Component {
   constructor(props){
@@ -23,7 +23,9 @@ export default class SurveyPage extends React.Component {
         <div {...content}>
           <h1> Your SVO is: {this.state.svo}</h1>
           <p>That means you're a {this.state.type}</p>
-          <div>svo chart goes here</div>
+          <div className={'results-container'}>
+            <Results width={300} height={300} svo={this.state.svo}/>
+          </div>
         </div>
       </div>
     )

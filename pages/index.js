@@ -44,13 +44,13 @@ export default class Index extends React.Component {
   }
 
   fetchUserData() {
-    let fields = {fields: 'first_name,last_name,email'}
+    let fields = {fields: 'first_name,last_name,email,gender'}
     FB.api('/me', fields, (res) => {
       console.log('Successful login for: ', res);
     });
   }
 
-  render(){
+  render() {
     return (
       <div {...styles}>
         <div {...content}>
