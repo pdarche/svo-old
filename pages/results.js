@@ -22,9 +22,9 @@ export default class SurveyPage extends React.Component {
       <div {...styles} >
         <div {...content}>
           <h1> Your SVO is: {this.state.svo}</h1>
-          <p>That means you're a {this.state.type}</p>
+          <p>That means you're <strong>{this.state.type}</strong></p>
           <div className={'results-container'}>
-            <Results width={300} height={300} svo={this.state.svo}/>
+            <Results width={400} height={400} svo={this.state.svo}/>
           </div>
         </div>
       </div>
@@ -50,6 +50,9 @@ const styles = css({
   },
   '& p': {
     font: '16px sans-serif'
+  },
+  '& .results-container div': {
+    margin: '0px'
   }
 });
 

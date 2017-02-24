@@ -30,67 +30,74 @@ export default class Results extends React.Component {
     let chart = container.append("g")
       .attr("class", "results")
 
-    let xAxis = d3.axisBottom(scales.x)
-    let yAxis = d3.axisLeft(scales.y)
+    let xAxis = d3.axisBottom(scales.x).ticks(10)
+    let yAxis = d3.axisLeft(scales.y).ticks(10)
 
     chart.append("g")
       .attr("class", "axis axis--x")
       .attr("transform", "translate(0, " + dims.height + ")")
-      .call(xAxis)
+      .call(xAxis.tickSizeInner(-dims.height))
 
     chart.append("g")
       .attr("class", "axis axis--y")
-      .call(yAxis)
+      .call(yAxis.tickSizeInner(-dims.width))
 
     chart.append("g")
       .attr("class", "ring")
-      .attr("transform", "translate(" + dims.margin.left + "," + dims.margin.left + ")")
 
     chart.select(".ring").append('circle')
-      .attr('cx', 50)
-      .attr('cy', 50)
-      .attr('r', 75)
+      .attr('cx', scales.x(50))
+      .attr('cy', scales.y(50))
+      .attr('r', scales.x(49))
       .style('fill', 'none')
       .style('stroke', 'gray')
       .style('stroke-width', 1)
 
     chart.select(".ring").append('circle')
-      .attr('cx', 50)
-      .attr('cy', 50)
+      .attr('cx', scales.x(50))
+      .attr('cy', scales.y(50))
       .attr('r', 5)
 
     chart.select(".ring").append("line")
       .attr("class", "svo-angle")
       .attr("x1", 0)
-      .attr("x2", 75)
+      .attr("x2", scales.x(49))
       .attr("y1", 0)
       .attr("y2", 0)
       .attr("transform-origin", "left")
-      .attr("transform", "translate(50, 50) rotate(0)")
+      .attr("transform", "translate(" + scales.x(50) + ", " + scales.y(50) +") rotate(0)")
       .style("stroke", "black")
       .style("stroke-width", 1)
 
+    let coords1 = this.getCoords(51, 90);
     chart.append("text")
-      .attr("x", scales.x(50)) // minus text width
-      .attr("y", scales.y(90))
+      .attr("x", scales.x(coords1.x) - 18) 
+      .attr("y", scales.y(coords1.y))
+      .attr("transform", "translate(" + scales.x(50) + ", " + -scales.y(50) +")") 
       .text("Altruist")
       .style("font-size", 12)
 
+    let coords2 = this.getCoords(51, 45);
     chart.append("text")
-      .attr("x", scales.x(78)) // minus text width
-      .attr("y", scales.y(78))
+      .attr("x", scales.x(coords2.x)) 
+      .attr("y", scales.y(coords2.y))
+      .attr("transform", "translate(" + scales.x(50) + ", " + -scales.y(50) +")") 
       .text("Prosocial")
       .style("font-size", 12)
 
+    let coords3 = this.getCoords(51, 0);
     chart.append("text")
-      .attr("x", scales.x(90)) // minus text width
-      .attr("y", scales.y(50))
+      .attr("x", scales.x(coords3.x)) 
+      .attr("y", scales.y(coords3.y))
+      .attr("transform", "translate(" + scales.x(50) + ", " + -scales.y(50) +")") 
       .text("Individualist")
       .style("font-size", 12)
 
+    let coords4 = this.getCoords(52, -45);
     chart.append("text")
-      .attr("x", scales.x(78)) // minus text width
-      .attr("y", scales.y(20))
+      .attr("x", scales.x(coords4.x)) 
+      .attr("y", scales.y(coords4.y))
+      .attr("transform", "translate(" + scales.x(50) + ", " + -scales.y(50) +")") 
       .text("Competitor")
       .style("font-size", 12)
 
@@ -99,8 +106,8 @@ export default class Results extends React.Component {
 
   _update(chart, scales, dims, props) {
     chart.select(".svo-angle")
-      .transition(5000)
-      .attr("transform", "translate(50, 50) rotate(-" + props.svo + ")")
+      .transition().duration(1200)
+      .attr("transform", "translate(" + scales.x(50) + ", " + scales.y(50) +") rotate(-" + props.svo + ")")
   }
   
   _scales(dims) {
@@ -116,11 +123,19 @@ export default class Results extends React.Component {
   }
 
   _dims(props) {
-    let margin = {right: 50, left: 50},
+    let margin = {right: 65, left: 50},
       width = props.width - margin.left - margin.right,
       height = props.height - margin.left - margin.right
 
     return { margin, width, height }
+  }
+
+  getCoords(z, deg) {
+    let rads = deg * (Math.PI / 180)
+    let x = z * Math.cos(rads)
+    let y = z * Math.sin(rads)
+
+    return {x, y}
   }
 
   render(){
@@ -139,6 +154,10 @@ const container = css({
   '& .ticks, .label': {
     font: '16px sans-serif',
     textAnchor: 'middle'
+  },
+  '& .tick line': {
+    opacity: .1,
+    strokeDasharray: "3,3"
   },
   '& .track, .track-inset, .track-overlay': {
     'strokeLinecap': 'round'

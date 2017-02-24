@@ -52,9 +52,9 @@ export default class Survey extends React.Component {
     if (svo > 22.45 && svo <= 57.15) {
       return 'prosocial'
     } else if (svo > -12.04 && svo <= 22.45) {
-      return 'individualist'
+      return 'individualistic'
     } else if (svo > 57.15) {
-      return 'altruist'
+      return 'altruistic'
     } else if (svo <= -12.04) {
       return 'competitive'
     }
