@@ -11,11 +11,11 @@ export default class Label extends React.Component {
       <div {...container}>
        <div className={'recipient'}>
         <p className={'recipient-label'}>You Receive</p>
-        <p className={'recipient-amount'}>{this.props.data[0]}</p>
+        <p className={'recipient-amount'}>{Math.round(this.props.data[0])}</p>
        </div>
        <div className={'recipient'}>
         <p className={'recipient-label'}>Other receives</p>
-        <p className={'recipient-amount'}>{this.props.data[1]}</p>
+        <p className={'recipient-amount'}>{Math.round(this.props.data[1])}</p>
        </div>
       </div>
     )

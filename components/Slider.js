@@ -43,7 +43,7 @@ export default class Slider extends React.Component {
     this._createLabel(sliderContainer, 0, 24, "Others receive")
 
     this._createLabel(slider, 0, -13, props.scales.min1)
-    this._createLabel(slider, dims.width, -13, props.scales.max1)
+    this._createLabel(slider, dims.width, -13, Math.round(props.scales.max1))
     this._createLabel(slider, 0, 25, props.scales.min2)
     this._createLabel(slider, dims.width, 25, props.scales.max2)
 
@@ -67,7 +67,7 @@ export default class Slider extends React.Component {
              handleGroup.attr("transform", "translate(" + scales.x1(d1) + ",0)");
              text1.text(Math.round(d1))
              text2.text(Math.round(d2))
-             _this.props.handleSlide([Math.round(d1), Math.round(d2)])
+             _this.props.handleSlide([d1, d2])
           }));
 
     slider.insert("g", ".track-overlay")
@@ -76,7 +76,7 @@ export default class Slider extends React.Component {
 
     let handleGroup = slider.insert("g", ".track-overlay") 
       .attr("class", "handle-group")
-      .attr("transform", "translate(" + scales.x1(props.data[0]) + ",0)");
+      .attr("transform", "translate(" + scales.x2(props.data[1]) + ",0)");
         
     let handle = handleGroup.append("circle") 
       .attr("class", "handle")
@@ -85,12 +85,12 @@ export default class Slider extends React.Component {
     let text1 = handleGroup.append("text")
       .attr("class", "label")
       .attr("y", -13)
-      .text(props.data[0])
+      .text(Math.round(props.data[0]))
 
     let text2 = handleGroup.append("text")
       .attr("class", "label")
       .attr("y", 25)
-      .text(props.data[1])
+      .text(Math.round(props.data[1]))
   }
   
   _scales(dims) {
@@ -118,7 +118,10 @@ export default class Slider extends React.Component {
   render(){
     return (
       <div {...container}>
-        <svg className={'slider-component'} width={this.props.width} height={this.props.height}></svg>
+        <svg 
+          className={'slider-component'} 
+          width={this.props.width} 
+          height={this.props.height}></svg>
       </div>
     )
   }

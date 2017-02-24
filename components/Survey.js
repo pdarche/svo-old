@@ -11,7 +11,7 @@ export default class Survey extends React.Component {
   constructor(props){
     super(props);
     this.values = [
-      {min1: 85, max1: 86, min2: 85, max2: 15},
+      {min1: 85, max1: 85.01, min2: 85, max2: 15},
       {min1: 85, max1: 100, min2: 15, max2: 50},
       {min1: 50, max1: 85, min2: 100, max2: 85},
       {min1: 50, max1: 85, min2: 100, max2: 15},
@@ -75,7 +75,7 @@ export default class Survey extends React.Component {
   centerPoint(ranges){
     let a = [ranges.min1, ranges.max1] 
     let b = [ranges.min2, ranges.max2]
-    return [Math.round(_.sum(a) / 2), Math.round(_.sum(b) / 2)]
+    return [_.sum(a) / 2, _.sum(b) / 2]
   }
 
   handleClick(ev) {

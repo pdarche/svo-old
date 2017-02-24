@@ -114,7 +114,7 @@ const container = css({
     strokeWidth: '2px'
   },
   '& .bar': {
-    fill: 'steelblue'
+    fill: '#3b5998'
   },
   '& .label': {
     font: '10px sans-serif',
