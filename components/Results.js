@@ -42,6 +42,19 @@ export default class Results extends React.Component {
       .attr("class", "axis axis--y")
       .call(yAxis.tickSizeInner(-dims.width))
 
+    // Axes
+    chart.append("text")
+      .attr("text-anchor", "middle")
+      .attr("transform", "translate(" + -30 + "," + dims.height / 2 + ") rotate(-90)")
+      .style("font-size", 12)
+      .text("Payoff to Other")
+
+    chart.append("text")
+      .attr("text-anchor", "middle")
+      .attr("transform", "translate(" + dims.width / 2 + "," + (dims.height + 30) + ")")
+      .style("font-size", 12)
+      .text("Payoff to Self")
+
     chart.append("g")
       .attr("class", "ring")
 
