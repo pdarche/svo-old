@@ -57,6 +57,10 @@ export default class Survey extends React.Component {
       answers: new Array(),
       startedAt: new Date()
     })
+    // Set the start time for the first question
+    this.setState({
+      startTime: new Date()
+    })
   }
 
   classifySVO(svo) {
@@ -94,12 +98,16 @@ export default class Survey extends React.Component {
     let otherTotal = this.state.otherTotal + this.state.data[1]
     let svo = this.computeSVO(selfTotal, otherTotal)
     let type = this.classifySVO(svo)
+    let submitTime = new Date()
     let answer = {
       _id: hat(),
+      sessionId: this.sessionId,
       self: this.state.data[0],
       other: this.state.data[1],
       question: this.state.question,
-      resonseTime: 0
+      startTime: this.state.startTime,
+      submitTime: submitTime,
+      resonseTime: submitTime - this.state.startTime 
     }
     // Post it to the database
     this.localDB.get(this.sessionId).then((doc) => {
@@ -124,6 +132,7 @@ export default class Survey extends React.Component {
       // set the state for the next question
       let ranges = this.values[nextQuestion]
       this.setState({
+        startTime: new Date(),
         question: nextQuestion,
         ranges: ranges,
         data: this.centerPoint(ranges),
