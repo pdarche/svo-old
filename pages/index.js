@@ -2,7 +2,7 @@ import React from 'react'
 import css from 'next/css'
 import PouchDB from 'pouchdb'
 import hat from 'hat'
-
+import 'isomorphic-fetch'
 
 export default class Index extends React.Component {
   constructor(props){
@@ -11,6 +11,17 @@ export default class Index extends React.Component {
   }
 
   componentDidMount(){
+    // TODO: Do some ip detection 
+    fetch('https://api.ipify.org?format=json')
+     .then(res => res.json())
+     .then((data) => { window.localStorage.setItem('ip', data.ip) })
+     .catch(e => console.log(e))
+
+    // Do some browser detection
+    let nav = this.getBrowserInfo() 
+    window.localStorage.setItem('browser', JSON.stringify(nav))
+
+    // Setup Facebook 
     window.fbAsyncInit = function() {
       FB.init({
         appId: '1321352514570155',
@@ -27,6 +38,17 @@ export default class Index extends React.Component {
       js.src = "//connect.facebook.net/en_US/sdk.js";
       fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));
+  }
+
+  getBrowserInfo() {
+    let _navigator = {};
+    for (let i in window.navigator) {
+      let attrType = typeof(window.navigator[i])
+      if (!['function', 'object'].includes(attrType)) {
+        _navigator[i] = window.navigator[i];
+      }
+    }
+    return _navigator
   }
 
   login(ev) {

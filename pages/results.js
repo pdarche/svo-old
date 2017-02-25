@@ -15,10 +15,20 @@ export default class ResultsPage extends React.Component {
   }
 
   componentDidMount(){
+    // Get some info from local storage
     let sessionId = window.localStorage.getItem('sessionId')
+    let browser = JSON.parse(window.localStorage.getItem('browser'))
+    let ip = window.localStorage.getItem('ip')
+
+    // Get the SVO score and update the local db
     this.localDB.get(sessionId).then((doc) => {
       this.setState({svo: Math.round(doc.svo), type: doc.type}); 
-    });
+      doc.browser = browser
+      doc.ip = ip
+      return this.localDB.put(doc)
+    }).catch(err => console.log(err))
+
+    // Sync the results 
     this.localDB.sync(this.remoteDB).on('complete', () => {
       console.log("synched!")
     })
