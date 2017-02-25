@@ -1,11 +1,12 @@
 import React from 'react'
 import css from 'next/css'
+import PouchDB from 'pouchdb' 
+import hat from 'hat'
 import _ from 'lodash'
 import Status from './Status'
 import Slider from './Slider'
 import Bar from './Bar'
 import Label from './Label'
-
 
 export default class Survey extends React.Component {
   constructor(props){
@@ -27,7 +28,7 @@ export default class Survey extends React.Component {
       {min1: 100, max1: 70, min2: 90, max2: 100},
       {min1: 90, max1: 100, min2: 100, max2: 50},
     ]
-
+    this.localDB = new PouchDB('responses');
     this.state = {
       question: 0,
       ranges: this.values[0],
@@ -38,14 +39,24 @@ export default class Survey extends React.Component {
     }
   }
 
-  componentDidUpdate() {
-    if (this.state.surveyComplete) {
-      let svo = this.computeSVO(this.state.selfTotal, this.state.otherTotal) 
-      let type = this.classifySVO(svo)
-      window.localStorage.setItem('svo', svo)
-      window.localStorage.setItem('type', type)
-      window.location = '/results'
+  componentDidMount() {
+    let user = JSON.parse(window.localStorage.getItem('user'))
+    this.createSession(user)
+  }
+
+  createSession(user) {
+    if (!user) {
+      // login the user
     }
+    let id = hat()
+    window.localStorage.setItem('sessionId', id)
+    this.sessionId = id 
+    this.localDB.put({
+      _id: id,
+      user: user,
+      answers: new Array(),
+      startedAt: new Date()
+    })
   }
 
   classifySVO(svo) {
@@ -78,10 +89,39 @@ export default class Survey extends React.Component {
     return [_.sum(a) / 2, _.sum(b) / 2]
   }
 
+  saveAnswer() {
+    let selfTotal = this.state.selfTotal + this.state.data[0]
+    let otherTotal = this.state.otherTotal + this.state.data[1]
+    let svo = this.computeSVO(selfTotal, otherTotal)
+    let type = this.classifySVO(svo)
+    let answer = {
+      _id: hat(),
+      self: this.state.data[0],
+      other: this.state.data[1],
+      question: this.state.question,
+      resonseTime: 0
+    }
+    // Post it to the database
+    this.localDB.get(this.sessionId).then((doc) => {
+      doc.answers.push(answer)
+      doc.completedAt = new Date();
+      doc.svo = svo
+      doc.type = type 
+      doc.selfTotal = selfTotal
+      doc.otherTotal = otherTotal
+      return this.localDB.put(doc)
+    })
+    .catch(err => console.log(err));
+  }
+
   handleClick(ev) {
     ev.preventDefault();
+    // Save the answer
+    this.saveAnswer();
+    // Update the state, if appropriate
     let nextQuestion = this.state.question + 1;
     if (nextQuestion !== 15) {
+      // set the state for the next question
       let ranges = this.values[nextQuestion]
       this.setState({
         question: nextQuestion,
@@ -92,11 +132,7 @@ export default class Survey extends React.Component {
         otherTotal: this.state.otherTotal + this.state.data[1]
       });
     } else {
-      this.setState({
-        surveyComplete: true,
-        selfTotal: this.state.selfTotal + this.state.data[0],
-        otherTotal: this.state.otherTotal + this.state.data[1]
-      })    
+      window.location = '/results'
     }
   }
 

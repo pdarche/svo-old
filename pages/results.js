@@ -1,27 +1,34 @@
 import React from 'react'
 import css from 'next/css'
+import PouchDB from 'pouchdb'
 import Results from '../components/Results'
 
-export default class SurveyPage extends React.Component {
+export default class ResultsPage extends React.Component {
   constructor(props){
     super(props);
+    this.localDB = new PouchDB('responses'); 
+    this.remoteDB = new PouchDB('http://localhost:5984/responses')
     this.state = {
-      svo: '(computing)',
+      svo: 0,
       type: '(computing)'
     }
   }
 
   componentDidMount(){
-    let svo = Math.round(window.localStorage.getItem('svo'), 2)
-    let type = window.localStorage.getItem('type')
-    this.setState({svo, type}) 
+    let sessionId = window.localStorage.getItem('sessionId')
+    this.localDB.get(sessionId).then((doc) => {
+      this.setState({svo: Math.round(doc.svo), type: doc.type}); 
+    });
+    this.localDB.sync(this.remoteDB).on('complete', () => {
+      console.log("synched!")
+    })
   }
 
   render(){
     return (
       <div {...styles} >
         <div {...content}>
-          <h1> Your SVO is: {this.state.svo}</h1>
+          <h1> Your SVO is: {this.state.svo}&deg;</h1>
           <p>That means you're <strong>{this.state.type}</strong></p>
           <div className={'results-container'}>
             <Results width={400} height={400} svo={this.state.svo}/>

@@ -1,10 +1,13 @@
 import React from 'react'
 import css from 'next/css'
+import PouchDB from 'pouchdb'
+import hat from 'hat'
 
 
 export default class Index extends React.Component {
   constructor(props){
     super(props);
+    this.localDB = new PouchDB('responses');
   }
 
   componentDidMount(){
@@ -29,25 +32,34 @@ export default class Index extends React.Component {
   login(ev) {
     ev.preventDefault()
     FB.getLoginStatus((response) => {
-      console.log(response);
+      // if the user is not connected, log them in and start a session
       if (response.status != 'connected') {
         FB.login((res) => { 
           console.log('the auth res', res)
+          // TODO: handle login logic here... 
           this.fetchUserData()
           window.location = '/survey'
         })
-      } else {
+      } 
+      // otherwise, fetch the data and create a new session
+      else {
         this.fetchUserData()
         window.location = '/survey'
       }
+      // If the decline the faceook login, ask for email
     });
   }
 
   fetchUserData() {
     let fields = {fields: 'first_name,last_name,email,gender'}
-    FB.api('/me', fields, (res) => {
-      console.log('Successful login for: ', res);
+    FB.api('/me', fields, (user) => {
+      console.log('Successful login for: ', user);
+      this.setUser(user)
     });
+  }
+
+  setUser(user) {
+    window.localStorage.setItem('user', JSON.stringify(user))
   }
 
   render() {
