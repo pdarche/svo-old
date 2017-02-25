@@ -73,8 +73,9 @@ export default class Index extends React.Component {
   }
 
   fetchUserData() {
-    let fields = {fields: 'first_name,last_name,email,gender'}
+    let fields = {fields: 'first_name,last_name,email,gender,picture'}
     FB.api('/me', fields, (user) => {
+      console.log('user is', user)
       this.setUser(user)
     });
   }
