@@ -55,7 +55,8 @@ const heading = css({
   width: '500px',
   '& h1': {
     width: '500px',
-    font: '40px sans-serif',
+    font: '30px sans-serif',
+    fontWeight: 'bold'
   },
   '& span': {
     display: 'flex',

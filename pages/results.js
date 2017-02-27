@@ -59,7 +59,8 @@ const styles = css({
   height: '90vh',
   '& h1': {
     width: '500px',
-    font: '40px sans-serif',
+    font: '30px sans-serif',
+    fontWeight: 'bold',
     marginBottom: '5px',
     textAlign: 'center'
   },
