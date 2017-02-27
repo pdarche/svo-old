@@ -150,22 +150,22 @@ export default class Survey extends React.Component {
 
   render(){
     return (
-        <div {...container}>
-          <Status n={this.state.question + 1}/>
-          <div {...labels}>
-            <Label data={this.state.data} />
-            <Bar width={200} height={96} data={this.state.data}/>
-          </div>
-          <Slider 
-            width={500}
-            height={100}
-            data={this.state.data}
-            scales={this.state.ranges}
-            reset={this.state.reset}
-            handleSlide={(val) => {this.onSlide(val)}}
-          />
-          <button onClick={(ev) => {this.handleClick(ev)}}>Submit</button>
+      <div {...container}>
+        <Status n={this.state.question + 1}/>
+        <div {...labels}>
+          <Label data={this.state.data} />
+          <Bar width={200} height={96} data={this.state.data}/>
         </div>
+        <Slider 
+          width={500}
+          height={100}
+          data={this.state.data}
+          scales={this.state.ranges}
+          reset={this.state.reset}
+          handleSlide={(val) => {this.onSlide(val)}}
+        />
+        <button onClick={(ev) => {this.handleClick(ev)}}>Submit</button>
+      </div>
     )
   }
 }

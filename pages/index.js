@@ -117,7 +117,8 @@ const styles = css({
   // backgroundColor: '#edfdff',
   '& h1': {
     width: '500px',
-    font: '40px sans-serif',
+    font: '30px sans-serif',
+    fontWeight: 'bold',
     marginBottom: '5px'
   },
   '& .description': {
