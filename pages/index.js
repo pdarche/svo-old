@@ -3,6 +3,7 @@ import css from 'next/css'
 import PouchDB from 'pouchdb'
 import hat from 'hat'
 import 'isomorphic-fetch'
+import Nav from '../components/Nav'
 
 export default class Index extends React.Component {
   constructor(props){
@@ -52,31 +53,36 @@ export default class Index extends React.Component {
   }
 
   login(ev) {
-    ev.preventDefault()
     FB.getLoginStatus((response) => {
-      // if the user is not connected, log them in and start a session
-      if (response.status != 'connected') {
-        FB.login((res) => { 
-          console.log('the auth res', res)
-          // TODO: handle login logic here... 
-          this.fetchUserData()
+      // if the user is connected, log them in and start a session
+      if (response.status === 'connected') {
+        this.fetchUserData(() => {
           window.location = '/survey'
         })
-      } 
-      // otherwise, fetch the data and create a new session
-      else {
-        this.fetchUserData()
-        window.location = '/survey'
+      } else if (response.status === 'not_authorized') { 
+        // Send them somewhere
+      } else {
+        // Log them in and then redirect
+        FB.login((res) => { 
+          if (res.status === 'connected') {
+            this.fetchUserData(() => {
+              window.location = '/survey'
+            })
+          } else {
+            alert("Sorry, you have to connect Facebook to take the survey!")
+            console.log('bummer') 
+          }
+        })
       }
       // If the decline the faceook login, ask for email
     });
   }
 
-  fetchUserData() {
-    let fields = {fields: 'first_name,last_name,email,gender,picture'}
+  fetchUserData(callback) {
+    let fields = {fields: 'first_name,last_name,email,gender,picture,age_range,locale,timezone,updated_time,verified,cover'}
     FB.api('/me', fields, (user) => {
-      console.log('user is', user)
       this.setUser(user)
+      callback()
     });
   }
 
@@ -87,6 +93,7 @@ export default class Index extends React.Component {
   render() {
     return (
       <div {...styles}>
+        <Nav/>
         <div {...content}>
           <h1>What's your Social Value Orientation?</h1>
           <div className={'description'}>

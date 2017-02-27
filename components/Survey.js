@@ -40,14 +40,17 @@ export default class Survey extends React.Component {
   }
 
   componentDidMount() {
-    let user = JSON.parse(window.localStorage.getItem('user'))
-    this.createSession(user)
+    let user = window.localStorage.getItem('user')
+    if (user) {
+      user = JSON.parse(user)
+      this.createSession(user)
+    } else {
+      alert("Sorry, you have to log in first!")
+      window.location = '/'
+    }
   }
 
   createSession(user) {
-    if (!user) {
-      // login the user
-    }
     let id = hat()
     window.localStorage.setItem('sessionId', id)
     this.sessionId = id 
@@ -147,7 +150,6 @@ export default class Survey extends React.Component {
 
   render(){
     return (
-      <div {...styles}>
         <div {...container}>
           <Status n={this.state.question + 1}/>
           <div {...labels}>
@@ -164,7 +166,6 @@ export default class Survey extends React.Component {
           />
           <button onClick={(ev) => {this.handleClick(ev)}}>Submit</button>
         </div>
-      </div>
     )
   }
 }

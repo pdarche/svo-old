@@ -1,5 +1,6 @@
 import React from 'react'
 import css from 'next/css'
+import Nav from '../components/Nav'
 import Survey from '../components/Survey'
 
 export default class SurveyPage extends React.Component {
@@ -7,11 +8,20 @@ export default class SurveyPage extends React.Component {
     super(props);
   }
 
-  render(){
+  render() {
     return (
-      <div>
+      <div {...styles}>
+        <Nav/>
         <Survey/>
       </div>
     )
   }
 }
+
+const styles = css({
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '90vh'
+});

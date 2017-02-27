@@ -1,20 +1,21 @@
 import React from 'react'
 import css from 'next/css'
 import PouchDB from 'pouchdb'
+import Nav from '../components/Nav'
 import Results from '../components/Results'
 
 export default class ResultsPage extends React.Component {
   constructor(props){
     super(props);
     this.localDB = new PouchDB('responses'); 
-    this.remoteDB = new PouchDB('http://localhost:5984/responses')
+    this.remoteDB = new PouchDB('https://svo.world/responses')
     this.state = {
       svo: 0,
       type: '(computing)'
     }
   }
 
-  componentDidMount(){
+  componentDidMount() {
     // Get some info from local storage
     let sessionId = window.localStorage.getItem('sessionId')
     let browser = JSON.parse(window.localStorage.getItem('browser'))
@@ -37,6 +38,7 @@ export default class ResultsPage extends React.Component {
   render(){
     return (
       <div {...styles} >
+        <Nav/>
         <div {...content}>
           <h1> Your SVO is: {this.state.svo}&deg;</h1>
           <p>That means you're <strong>{this.state.type}</strong></p>

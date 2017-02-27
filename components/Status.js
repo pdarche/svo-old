@@ -24,6 +24,7 @@ export default class Status extends React.Component {
         <ReactModal
           isOpen={this.state.info}
           onRequestClose={() => {this.handleRequestClose()}}
+          contentLabel={'Modal'}
           style={{content: content, overlay: overlay}}>
           <p>Below, you see a slider.  You can change the slider to adjust the amount of money you and the other person will receive.</p>
           <p>The numbers at the ends of the slider show the range of possible distributions for you and the other person.</p>

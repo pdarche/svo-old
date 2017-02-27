@@ -2,7 +2,6 @@
   "name": "svo",
   "version": "1.0.0",
   "description": "Social Value Orientation slider",
-  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "next",
@@ -18,6 +17,8 @@
     "hat": "0.0.3",
     "isomorphic-fetch": "^2.2.1",
     "lodash": "^4.17.4",
-    "next": "^1.2.3"
+    "next": "^1.2.3",
+    "pouchdb": "^6.1.2",
+    "react-modal": "^1.6.5"
   }
 }
