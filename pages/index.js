@@ -26,6 +26,7 @@ export default class Index extends React.Component {
     window.fbAsyncInit = function() {
       FB.init({
         appId: '1321352514570155',
+        status: true,
         xfbml: true,
         version: 'v2.8'
       });
