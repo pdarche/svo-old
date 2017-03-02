@@ -98,8 +98,9 @@ export default class Index extends React.Component {
         <div {...content}>
           <h1>What's your Social Value Orientation?</h1>
           <div className={'description'}>
-          <p>The <strong>social value orientation</strong> is a measure of how we relate to other people.  On the next page you'll find a series of sliders.  You as the decision maker can register choices by moving a slider to change payoff allocations between you and some other person.  Once you have made your choice, press the submit button and go to the next question. </p>
-          <p>There are no right or wrong answers, this is all about personal preferences.  As you'll see, your choices will influence both the amount of money you receive as well as the amount of money the other receives.</p>
+          <p>We all relate to people a little differently.  Some like to put others before themselves.  Some enjoy coming out on top in competition.  And others fall somewhere in between.  The <strong><a href="https://en.wikipedia.org/wiki/Social_value_orientations" _target="blank">social value orientation</a></strong> is a measure of where we fall on this scale from competitive to altruistic.</p> 
+          <p>The next page contains the tasks that make up the SVO.  Your job is to move each of the sliders to the allocation between you and some other person that you most prefer. There are no right or wrong answers, this is all about personal preferences.</p>
+          <p>Ready to find out your SVO?  Click the button below to take the survey!</p>
           </div>
           <div {...button} onClick={(ev) => {this.login(ev)}}>Go to the survey</div>
         </div>
@@ -118,7 +119,7 @@ const styles = css({
   // backgroundColor: '#edfdff',
   '& h1': {
     width: '500px',
-    font: '30px sans-serif',
+    font: '35px sans-serif',
     fontWeight: 'bold',
     marginBottom: '5px'
   },
