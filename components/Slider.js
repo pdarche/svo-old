@@ -51,7 +51,6 @@ export default class Slider extends React.Component {
   }
 
   _update(slider, scales, dims, props) {
-    var _this = this;
     slider.append("line")
        .attr("class", "track")
        .attr("x1", scales.x1.range()[0])
@@ -60,23 +59,19 @@ export default class Slider extends React.Component {
        .attr("class", "track-inset")
      .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
        .attr("class", "track-overlay")
-       .call(d3.drag()
-           .on("start drag", function() {
-             let d1 = scales.x1.invert(d3.event.x)
-             let d2 = scales.x2.invert(d3.event.x)
-             handleGroup.attr("transform", "translate(" + scales.x1(d1) + ",0)");
-             text1.text(Math.round(d1))
-             text2.text(Math.round(d2))
-             _this.props.handleSlide([d1, d2])
-          }));
 
-    slider.insert("g", ".track-overlay")
-        .attr("class", "ticks")
-        .attr("transform", "translate(0," + -18 + ")")
-
-    let handleGroup = slider.insert("g", ".track-overlay") 
+    let handleGroup = slider.append('g') 
       .attr("class", "handle-group")
       .attr("transform", "translate(" + scales.x2(props.data[1]) + ",0)");
+
+    handleGroup.call(d3.drag().on("drag start", () => {
+       let d1 = scales.x1.invert(d3.event.x)
+       let d2 = scales.x2.invert(d3.event.x)
+       handleGroup.attr("transform", "translate(" + scales.x2(d2) + ",0)");
+       text1.text(Math.round(d1))
+       text2.text(Math.round(d2))
+       this.props.handleSlide([d1, d2])
+    }));
         
     let handle = handleGroup.append("circle") 
       .attr("class", "handle")
@@ -145,16 +140,16 @@ const container = css({
   },
   '& .track-overlay': {
     pointerEvents: 'stroke',
-    strokeWidth: '20px',
-    cursor: 'grab',
+    strokeWidth: '20px'
   },
   '& .handle': {
     fill: '#fff',
     stroke: '#000',
     strokeOpacity: '0.5',
     strokeWidth: '1.25px',
+    cursor: 'grab',
   },
-  '& .track-overlay:active': {
+  '& .handle:active': {
     cursor: 'grabbing'
   }
 });
