@@ -1,17 +1,29 @@
 import React from 'react'
+import Head from 'next/head'
 import css from 'next/css'
 import PouchDB from 'pouchdb'
 import hat from 'hat'
 import 'isomorphic-fetch'
 import Nav from '../components/Nav'
+import ReactGA from 'react-ga'
+import { ANALYTICS_TRACKING_ID } from '../config'
+
 
 export default class Index extends React.Component {
   constructor(props){
     super(props);
     this.localDB = new PouchDB('responses');
+    if (process.browser) {
+      ReactGA.initialize(ANALYTICS_TRACKING_ID)
+    } 
   }
 
   componentDidMount(){
+    // Log the analytics
+    const page = window.location.pathname;
+    ReactGA.set({page: page})
+    ReactGA.pageview(page)
+
     // TODO: Do some ip detection 
     fetch('https://api.ipify.org?format=json')
      .then(res => res.json())
@@ -54,6 +66,11 @@ export default class Index extends React.Component {
   }
 
   login(ev) {
+    ReactGA.event({
+      category: 'User',
+      action: 'Clicked to go to survey'
+    });
+
     FB.getLoginStatus((response) => {
       // if the user is connected, log them in and start a session
       if (response.status === 'connected') {
@@ -98,7 +115,7 @@ export default class Index extends React.Component {
         <div {...content}>
           <h1>What's your Social Value Orientation?</h1>
           <div className={'description'}>
-          <p>We all relate to people a little differently.  Some like to put others before themselves.  Some enjoy coming out on top in competition.  And others fall somewhere in between.  The <strong><a href="https://en.wikipedia.org/wiki/Social_value_orientations" _target="blank">social value orientation</a></strong> is a measure of where we fall on this scale from competitive to altruistic.</p> 
+          <p>We all relate to people a little differently.  Some like to put others before themselves.  Some enjoy coming out on top in competition.  And others fall somewhere in between.  The <strong><a href="https://en.wikipedia.org/wiki/Social_value_orientations">social value orientation</a></strong> is a measure of where we fall on this scale from competitive to altruistic.</p> 
           <p>The next page contains the tasks that make up the SVO.  Your job is to move each of the sliders to the allocation between you and some other person that you most prefer. There are no right or wrong answers, this is all about personal preferences.</p>
           <p>Ready to find out your SVO?  Click the button below to take the survey!</p>
           </div>

@@ -1,20 +1,36 @@
 import React from 'react'
 import css from 'next/css'
 import ReactModal from 'react-modal'
+import ReactGA from 'react-ga' 
 import Nav from '../components/Nav'
 import Survey from '../components/Survey'
+import { ANALYTICS_TRACKING_ID } from '../config'
+
 
 export default class SurveyPage extends React.Component {
   constructor(props){
     super(props);
     this.state = {acknowledged: false}
+    if (process.browser) {
+      ReactGA.initialize(ANALYTICS_TRACKING_ID)
+    } 
+  }
+
+  componentDidMount() {
+    const page = window.location.pathname;
+    ReactGA.set({page: page})
+    ReactGA.pageview(page)
   }
 
   handleRequestClose(ev) {
-    // this.setState({acknowledged: true})
+    // Nothin doin' don't let 'em close by clicking off
   }
 
   handleAcknowledgement(ev) {
+    ReactGA.event({
+      category: 'User',
+      action: 'Acknowledged the instructions'
+    });
     this.setState({acknowledged: true})
   }
 
@@ -40,7 +56,9 @@ export default class SurveyPage extends React.Component {
           <p>The following tasks involve allocating a payoff between you and another person.  You can think of the other person as someone you might encounter randomly on the street.  The person isn't especially well-off or especially needy and there's nothing otherwise special about the circumstances.</p>
           <p> Your task is to adjust the slider below to the allocation between you and the other person that you most prefer.</p> 
           <p>The numbers at the slider handle represent the current allocation.  The numbers at the end represent the range of possible allocations.  Once you've adjusted the slider to your preferred allocation press the Submit button.</p>
-          <div {...button} onClick={(ev) => {this.handleAcknowledgement(ev)}}>Got it!</div>
+          <div {...button} onClick={(ev) => {this.handleAcknowledgement(ev)}}>
+            Got it!
+          </div>
         </ReactModal>
         {survey}
       </div>

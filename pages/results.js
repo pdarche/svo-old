@@ -1,8 +1,11 @@
 import React from 'react'
 import css from 'next/css'
 import PouchDB from 'pouchdb'
+import ReactGA from 'react-ga' 
 import Nav from '../components/Nav'
 import Results from '../components/Results'
+import { ANALYTICS_TRACKING_ID } from '../config'
+
 
 export default class ResultsPage extends React.Component {
   constructor(props){
@@ -13,9 +16,17 @@ export default class ResultsPage extends React.Component {
       svo: 0,
       type: '(computing)'
     }
+    if (process.browser) {
+      ReactGA.initialize(ANALYTICS_TRACKING_ID)
+    } 
   }
 
   componentDidMount() {
+    // Log the Analytics
+    const page = window.location.pathname;
+    ReactGA.set({page: page})
+    ReactGA.pageview(page)
+
     // Get some info from local storage
     let sessionId = window.localStorage.getItem('sessionId')
     let browser = JSON.parse(window.localStorage.getItem('browser'))
@@ -31,7 +42,10 @@ export default class ResultsPage extends React.Component {
 
     // Sync the results 
     this.localDB.sync(this.remoteDB).on('complete', () => {
-      console.log("synched!")
+      ReactGA.event({
+        category: 'User',
+        action: 'Synched data'
+      });
     })
   }
 

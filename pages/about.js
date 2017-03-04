@@ -15,7 +15,7 @@ export default class SurveyPage extends React.Component {
         <div {...content}>
           <div {...text}>
             <h2>About the Project</h2>
-            <p>This application part of research project on social value orientation.  The goal is to better understand what explains the variation in people's orientations.  Peter Darche is the principal investigator.  Please reach out to him with any questions or feedback <a href="mailto:pmd2139@columbia.edu">here</a>.</p>          
+            <p>This application part of research project on social value orientation.  The goal is to better understand what explains the variation orientations.  Peter Darche is the principal investigator.  Please reach out to him with any questions or feedback <a href="mailto:pdarche@gmail.com">here</a>.</p>          
             <h2>Data Privacy</h2>
             <p>The data associated with this survey will not be shared with anyone.  Information will never be posted to facebook and only you and the research team will see anything associated with application.  Most data is stored on your computer and only sent to us once over a secure connection.</p>
           </div>

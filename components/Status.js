@@ -1,20 +1,32 @@
 import React from 'react'
 import css from 'next/css'
+import ReactGA from 'react-ga'
 import ReactModal from 'react-modal'
+import { ANALYTICS_TRACKING_ID } from '../config'
+
 
 export default class Status extends React.Component {
   constructor(props){
     super(props);
-    this.state = {
-      info: false
-    }
+    this.state = { info: false }
+    if (process.browser) {
+      ReactGA.initialize(ANALYTICS_TRACKING_ID)
+    } 
   }
 
   openModal() {
+    ReactGA.event({
+      category: 'User',
+      action: 'Opened the help instructions'
+    })
     this.setState({info: true})
   }
 
   handleRequestClose() {
+    ReactGA.event({
+      category: 'User',
+      action: 'Closed the help instructions'
+    })
     this.setState({info: false})
   }
 
@@ -32,7 +44,7 @@ export default class Status extends React.Component {
         </ReactModal>
         
         <div {...heading}>
-         <h1>Question {this.props.n} of 15</h1>
+         <h1> Task {this.props.n} of 15</h1>
          <span onClick={() => {this.openModal()}}>i</span>
         </div>
      </div>
