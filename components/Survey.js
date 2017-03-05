@@ -28,7 +28,8 @@ export default class Survey extends React.Component {
       {min1: 100, max1: 70, min2: 90, max2: 100},
       {min1: 90, max1: 100, min2: 100, max2: 50},
     ]
-    this.localDB = new PouchDB('responses');
+    let db = window.localStorage.getItem('db')
+    this.localDB = new PouchDB(db); 
     this.state = {
       question: 0,
       ranges: this.values[0],

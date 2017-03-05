@@ -7,14 +7,31 @@ import 'isomorphic-fetch'
 import Nav from '../components/Nav'
 import ReactGA from 'react-ga'
 import { ANALYTICS_TRACKING_ID } from '../config'
+require('pouchdb-all-dbs')(PouchDB)
 
 
 export default class Index extends React.Component {
   constructor(props){
     super(props);
-    this.localDB = new PouchDB('responses');
+
+
+    // Check for any dbs
+    // If one exists prefixed w/ svo, use that one
     if (process.browser) {
       ReactGA.initialize(ANALYTICS_TRACKING_ID)
+      PouchDB.allDbs().then((dbs) => {
+        let db 
+        let substr = "svo"
+        let substrs = dbs.map((str) => { return str.slice(0, 3) })
+        if (substrs.includes(substr)) {
+          let index = substrs.indexOf(substr)
+          db = dbs[index] 
+        } else {
+          db = "svo-" + hat()
+        }
+        this.localDB = new PouchDB(db);
+        window.localStorage.setItem('db', db)
+      }).catch(e => console.log(e))
     } 
   }
 

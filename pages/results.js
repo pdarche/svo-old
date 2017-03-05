@@ -10,14 +10,16 @@ import { ANALYTICS_TRACKING_ID } from '../config'
 export default class ResultsPage extends React.Component {
   constructor(props){
     super(props);
-    this.localDB = new PouchDB('responses'); 
-    this.remoteDB = new PouchDB('https://svo.world/responses')
     this.state = {
       svo: 0,
       type: '(computing)'
     }
     if (process.browser) {
       ReactGA.initialize(ANALYTICS_TRACKING_ID)
+      let db = window.localStorage.getItem('db')
+      this.localDB = new PouchDB(db); 
+      this.remoteDB = new PouchDB(`https://svo.world/${db}`)
+      this.remoteDB.info()
     } 
   }
 
