@@ -21,6 +21,7 @@ export default class Nav extends React.Component {
 const navBar = css({
   position: 'absolute',
   top: '0px',
+  left: 0,
   width: '100%',
   padding: '0px',
   height: '40px',

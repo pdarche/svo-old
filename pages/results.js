@@ -12,7 +12,8 @@ export default class ResultsPage extends React.Component {
     super(props);
     this.state = {
       svo: 0,
-      type: '(computing)'
+      type: '(computing)',
+      sessionId: null
     }
     if (process.browser) {
       ReactGA.initialize(ANALYTICS_TRACKING_ID)
@@ -24,7 +25,7 @@ export default class ResultsPage extends React.Component {
   }
 
   componentDidMount() {
-    // Log the Analytics
+    // Analytics
     const page = window.location.pathname;
     ReactGA.set({page: page})
     ReactGA.pageview(page)
@@ -36,7 +37,7 @@ export default class ResultsPage extends React.Component {
 
     // Get the SVO score and update the local db
     this.localDB.get(sessionId).then((doc) => {
-      this.setState({svo: Math.round(doc.svo), type: doc.type}); 
+      this.setState({svo: Math.round(doc.svo), type: doc.type, sessionId: sessionId}); 
       doc.browser = browser
       doc.ip = ip
       return this.localDB.put(doc)
@@ -60,6 +61,9 @@ export default class ResultsPage extends React.Component {
           <p>That means you're <strong>{this.state.type}</strong></p>
           <div className={'results-container'}>
             <Results width={400} height={400} svo={this.state.svo}/>
+          </div>
+          <div {...surveyInfo}>
+            <p>Survey Id: {this.state.sessionId}</p>
           </div>
         </div>
       </div>
@@ -99,4 +103,17 @@ const content = css({
   alignItems: 'center',
   width: '960px',
   height: '500px'
+});
+
+const surveyInfo = css({
+  display: 'flex',
+  flexDirection: 'row',
+  justifyContent: 'center',
+  alignItems: 'center',
+  margin: '10px 0px',
+  width: '500px',
+  '& p': {
+    fontSize: 10,
+    color: '#333'
+  }
 });

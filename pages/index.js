@@ -10,11 +10,9 @@ import { ANALYTICS_TRACKING_ID } from '../config'
 require('pouchdb-all-dbs')(PouchDB)
 
 
-export default class Index extends React.Component {
+export default class IndexPage extends React.Component {
   constructor(props){
     super(props);
-
-
     // Check for any dbs
     // If one exists prefixed w/ svo, use that one
     if (process.browser) {
@@ -36,7 +34,7 @@ export default class Index extends React.Component {
   }
 
   componentDidMount(){
-    // Log the analytics
+    // Set up the analytics
     const page = window.location.pathname;
     ReactGA.set({page: page})
     ReactGA.pageview(page)
