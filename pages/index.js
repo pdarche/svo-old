@@ -49,7 +49,11 @@ export default class IndexPage extends React.Component {
     let nav = this.getBrowserInfo() 
     window.localStorage.setItem('browser', JSON.stringify(nav))
 
-    // Setup Facebook 
+    // Setup Facebook
+    this.setupFacebook()
+  }
+
+  setupFacebook() {
     window.fbAsyncInit = function() {
       FB.init({
         appId: '1321352514570155',
@@ -87,33 +91,35 @@ export default class IndexPage extends React.Component {
     });
 
     FB.getLoginStatus((response) => {
-      // if the user is connected, log them in and start a session
-      if (response.status === 'connected') {
-        this.fetchUserData(() => {
-          window.location = '/survey'
-        })
-      } else if (response.status === 'not_authorized') { 
-        // Send them somewhere
-      } else {
-        // Log them in and then redirect
-        FB.login((res) => { 
-          if (res.status === 'connected') {
-            this.fetchUserData(() => {
-              window.location = '/survey'
-            })
-          } else {
-            alert("Sorry, you have to connect Facebook to take the survey!")
-            console.log('bummer') 
-          }
-        })
+      switch (response.status) {
+        case 'connected':
+          this.fetchUserData(() => {window.location = '/survey'})
+          break;
+        case 'not_authorized':
+          // get authorization 
+          console.log('need authorization')
+          break;
+        default:
+          // login to facebook
+          this.loginUser()
       }
-      // If the decline the faceook login, ask for email
     });
   }
 
+  loginUser() {
+    FB.login((res) => { 
+      if (res.status === 'connected') {
+        this.fetchUserData(() => {window.location = '/survey'})
+      } else {
+        alert("Sorry, you have to connect Facebook to take the survey!")
+      }
+    })
+  }
+
   fetchUserData(callback) {
-    let fields = {fields: 'first_name,last_name,email,gender,picture,age_range,locale,timezone,updated_time,verified,cover'}
+    let fields = {fields: 'gender,age_range,locale,timezone,updated_time,verified'}
     FB.api('/me', fields, (user) => {
+      user.userId = hat()
       this.setUser(user)
       callback()
     });
@@ -133,6 +139,7 @@ export default class IndexPage extends React.Component {
           <p>We all relate to people a little differently.  Some like to put others before themselves.  Some enjoy coming out on top in competition.  And others fall somewhere in between.  The <strong><a href="https://en.wikipedia.org/wiki/Social_value_orientations">social value orientation</a></strong> is a measure of where we fall on this scale from competitive to altruistic.</p> 
           <p>The next page contains the tasks that make up the SVO.  Your job is to move each of the sliders to the allocation between you and some other person that you most prefer. There are no right or wrong answers, this is all about personal preferences.</p>
           <p>Ready to find out your SVO?  Click the button below to take the survey!</p>
+          <p>Note: the survey uses facebook but it does not collect personally identifying information. Read more here.</p>
           </div>
           <div {...button} onClick={(ev) => {this.login(ev)}}>Go to the survey</div>
         </div>
