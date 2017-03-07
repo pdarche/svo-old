@@ -4,8 +4,9 @@ import css from 'next/css'
 import PouchDB from 'pouchdb'
 import hat from 'hat'
 import 'isomorphic-fetch'
-import Nav from '../components/Nav'
+import ReactModal from 'react-modal'
 import ReactGA from 'react-ga'
+import Nav from '../components/Nav'
 import { ANALYTICS_TRACKING_ID } from '../config'
 require('pouchdb-all-dbs')(PouchDB)
 
@@ -13,6 +14,7 @@ require('pouchdb-all-dbs')(PouchDB)
 export default class IndexPage extends React.Component {
   constructor(props){
     super(props);
+    this.state = {modal: false}
     // Check for any dbs
     // If one exists prefixed w/ svo, use that one
     if (process.browser) {
@@ -93,14 +95,12 @@ export default class IndexPage extends React.Component {
     FB.getLoginStatus((response) => {
       switch (response.status) {
         case 'connected':
-          this.fetchUserData(() => {window.location = '/survey'})
+          this.checkUser()
           break;
         case 'not_authorized':
-          // get authorization 
           console.log('need authorization')
           break;
         default:
-          // login to facebook
           this.loginUser()
       }
     });
@@ -109,37 +109,66 @@ export default class IndexPage extends React.Component {
   loginUser() {
     FB.login((res) => { 
       if (res.status === 'connected') {
-        this.fetchUserData(() => {window.location = '/survey'})
+        this.fetchUser((user) => { 
+          window.localStorage.setItem('user', JSON.stringify(user))
+          window.location = '/survey'
+        })
       } else {
-        alert("Sorry, you have to connect Facebook to take the survey!")
+        alert("Sorry, you must connect Facebook to take the survey!")
       }
     })
   }
 
-  fetchUserData(callback) {
+  fetchUser(callback) {
     let fields = {fields: 'gender,age_range,locale,timezone,updated_time,verified'}
     FB.api('/me', fields, (user) => {
       user.userId = hat()
-      this.setUser(user)
-      callback()
+      callback(user)
     });
   }
 
-  setUser(user) {
-    window.localStorage.setItem('user', JSON.stringify(user))
+  checkUser() {
+    let user = window.localStorage.getItem('user')
+    if (!user) {
+      this.fetchUser((user) => { 
+        window.localStorage.setItem('user', JSON.stringify(user))
+        window.location = '/survey'
+      }) 
+    } else {
+      window.location = '/survey'
+    }
+  }
+
+  showModal(ev) {
+    ev.preventDefault()
+    this.setState({modal: true})
   }
 
   render() {
     return (
       <div {...styles}>
         <Nav/>
-        <div {...content}>
+
+        <ReactModal 
+          isOpen={this.state.modal}
+          onRequestClose={(ev) => {}}
+          contentLabel={'Modal'}
+          style={{content: content, overlay: overlay}}>
+          <h3>Facebook?  Really...?</h3>
+          <p>We know that people are wary of how Facebook data can be used to invade their privacy.  We're using the service to access information about participants without them having to fill in a huge number of additional survey questions.</p>  
+          <p><strong>We do not store, send, or use any personally identifying information (ids, names, email addresses, pictures) from the service.</strong></p>
+          <p>Check out the <a href="/about"> about</a> page to find out more about what information we collect, how we use it, and the steps we've taken to keep it safe. </p>
+          <div {...modalButton} onClick={(ev) => {this.setState({modal: false})}}>
+            Got it!
+          </div>
+        </ReactModal>
+
+        <div {...content_}>
           <h1>What's your Social Value Orientation?</h1>
           <div className={'description'}>
           <p>We all relate to people a little differently.  Some like to put others before themselves.  Some enjoy coming out on top in competition.  And others fall somewhere in between.  The <strong><a href="https://en.wikipedia.org/wiki/Social_value_orientations">social value orientation</a></strong> is a measure of where we fall on this scale from competitive to altruistic.</p> 
-          <p>The next page contains the tasks that make up the SVO.  Your job is to move each of the sliders to the allocation between you and some other person that you most prefer. There are no right or wrong answers, this is all about personal preferences.</p>
-          <p>Ready to find out your SVO?  Click the button below to take the survey!</p>
-          <p>Note: the survey uses facebook but it does not collect personally identifying information. Read more here.</p>
+          <p>This site is part of a project to better understand how and why our SVOs differ.  To find out your orientation, click the link below!</p>
+          <p className="note"><strong> Note:</strong> We use Facebook, but <strong>do not</strong> retain any identifying information. Click <a href="#" onClick={(ev) => {this.showModal(ev)}}>here</a> to learn more.</p> 
           </div>
           <div {...button} onClick={(ev) => {this.login(ev)}}>Go to the survey</div>
         </div>
@@ -167,11 +196,18 @@ const styles = css({
     width: '500px'
   },
   '& p': {
-    font: '16px sans-serif'
+    font: '18px sans-serif'
+  },
+  '& .note': {
+    fontSize: 16
   }
 });
 
-const content = css({
+const note = css({
+  fontSize: 'small'
+})
+
+const content_ = css({
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
@@ -191,6 +227,38 @@ const button = css({
   justifyContent: 'center',
   textAlign: 'center',
   borderRadius: '10px',
+  ':hover': {
+    cursor: 'pointer'
+  }
+});
+
+const overlay = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+}
+
+const content = {
+  position: '',
+  width: '450px',
+  font: '18px sans-serif',
+  '& div': {
+    margin: '0px auto'
+  }
+}
+
+const modalButton = css({
+  width: '100px',
+  height: '30px',
+  font: "14px sans-serif",
+  color: "white",
+  margin: '0px auto',
+  backgroundColor: '#3b5998',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  textAlign: 'center',
+  borderRadius: '5px',
   ':hover': {
     cursor: 'pointer'
   }
