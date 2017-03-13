@@ -30,6 +30,7 @@ export default class Survey extends React.Component {
     ]
     let db = window.localStorage.getItem('db')
     this.localDB = new PouchDB(db); 
+    this.events = new Array()
     this.state = {
       question: 0,
       ranges: this.values[0],
@@ -54,12 +55,14 @@ export default class Survey extends React.Component {
   createSession(user) {
     let id = hat()
     window.localStorage.setItem('sessionId', id)
-    this.sessionId = id 
+    this.sessionId = id // TODO: move this to state
+    // Create a new session
     this.localDB.put({
       _id: id,
       user: user,
       answers: new Array(),
-      startedAt: new Date()
+      startedAt: new Date(),
+      events: new Array()
     })
     // Set the start time for the first question
     this.setState({
@@ -79,16 +82,43 @@ export default class Survey extends React.Component {
     }
   }
 
-  computeSVO(selfTotal, otherTotal){
-    let selfAvg = (selfTotal / 15) - 50 
-    let otherAvg = (otherTotal / 15) - 50 
+  computeSVO(selfTotal, otherTotal, denom) {
+    let selfAvg = (selfTotal / denom) - 50 
+    let otherAvg = (otherTotal / denom) - 50 
     let ratio = otherAvg / selfAvg
     let svo = Math.atan(ratio) * 180 / Math.PI
     return svo
   }
 
   onSlide(val) {
+    // Push the event to the events array
+    this.events.push({
+      _id: hat(),
+      question: this.state.question,
+      sessionId: this.sessionId,
+      category: 'Survey',
+      type: 'Moved Slider', 
+      occuredAt: new Date(),
+      selfStart: this.state.data[0],
+      self: val[0],
+      otherStart: this.state.data[1],
+      other: val[1]
+    })
+    
+    // Set the state with the new value
     this.setState({data: val, reset: false})
+  }
+
+  onInstructionEvent(type) {
+    this.events.push({
+      _id: hat(),
+      question: this.state.question,
+      sessionId: this.state.sessionId,
+      category: 'Survey',
+      type: type, 
+      value: null,
+      occuredAt: new Date()
+    })
   }
 
   centerPoint(ranges){
@@ -100,9 +130,11 @@ export default class Survey extends React.Component {
   saveAnswer() {
     let selfTotal = this.state.selfTotal + this.state.data[0]
     let otherTotal = this.state.otherTotal + this.state.data[1]
-    let svo = this.computeSVO(selfTotal, otherTotal)
+    let svo = this.computeSVO(selfTotal, otherTotal, this.values.length)
     let type = this.classifySVO(svo)
     let submitTime = new Date()
+    console.log('current svo', svo)
+    console.log('current class', type)
     let answer = {
       _id: hat(),
       sessionId: this.sessionId,
@@ -111,7 +143,8 @@ export default class Survey extends React.Component {
       question: this.state.question,
       startTime: this.state.startTime,
       submitTime: submitTime,
-      resonseTime: submitTime - this.state.startTime 
+      resonseTime: submitTime - this.state.startTime,
+      ranges: this.state.ranges
     }
     // Post it to the database
     this.localDB.get(this.sessionId).then((doc) => {
@@ -121,6 +154,7 @@ export default class Survey extends React.Component {
       doc.type = type 
       doc.selfTotal = selfTotal
       doc.otherTotal = otherTotal
+      doc.events = this.events
       return this.localDB.put(doc)
     })
     .catch(err => console.log(err));
@@ -132,7 +166,7 @@ export default class Survey extends React.Component {
     this.saveAnswer();
     // Update the state, if appropriate
     let nextQuestion = this.state.question + 1;
-    if (nextQuestion !== 15) {
+    if (nextQuestion !== this.values.length) {
       // set the state for the next question
       let ranges = this.values[nextQuestion]
       this.setState({
@@ -152,7 +186,9 @@ export default class Survey extends React.Component {
   render(){
     return (
       <div {...container}>
-        <Status n={this.state.question + 1}/>
+        <Status 
+          n={this.state.question + 1}
+          onInstructionEvent={(type) => {this.onInstructionEvent(type)}}/>
         <div {...labels}>
           <Label data={this.state.data} />
           <Bar width={200} height={96} data={this.state.data}/>

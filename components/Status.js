@@ -19,6 +19,7 @@ export default class Status extends React.Component {
       category: 'User',
       action: 'Opened the help instructions'
     })
+    this.props.onInstructionEvent('Opened help instructions')
     this.setState({info: true})
   }
 
@@ -27,6 +28,7 @@ export default class Status extends React.Component {
       category: 'User',
       action: 'Closed the help instructions'
     })
+    this.props.onInstructionEvent('Closed help instructions')
     this.setState({info: false})
   }
 
@@ -45,7 +47,7 @@ export default class Status extends React.Component {
         
         <div {...heading}>
          <h1> Task {this.props.n} of 15</h1>
-         <span onClick={() => {this.openModal()}}>i</span>
+         <span onClick={() => {this.openModal()}}>instructions</span>
         </div>
      </div>
     )
@@ -76,26 +78,16 @@ const heading = css({
     alignItems: 'center',
     width: '30px',
     height: '30px',
-    borderRadius: '15px',
-    border: '1px solid black',
+    // borderRadius: '15px',
+    // border: '1px solid black',
     fontSize: '18px',
+    color: '#aaa',
     margin: '20px 0px',
     '&:hover': {
-      cursor: 'pointer'
+      cursor: 'pointer',
+      color: '#333'
     }
   }
-
-  // border: '1px solid #ccc',
- // display: 'flex',
- // height: '30px',
- // justifyContent: 'center',
- // padding: '20px',
- // margin: '10px',
- // '& h1': {
- //   //justifyContent: 'center',
- //   //alignSelf: 'center',
- //   font: '28px sans-serif',
- // }
 });
 
 const overlay = {

@@ -120,7 +120,7 @@ export default class Results extends React.Component {
   _update(chart, scales, dims, props) {
     chart.select(".svo-angle")
       .transition().duration(1200)
-      .attr("transform", "translate(" + scales.x(50) + ", " + scales.y(50) +") rotate(-" + props.svo + ")")
+      .attr("transform", "translate(" + scales.x(50) + ", " + scales.y(50) +") rotate(" + (-props.svo) + ")")
   }
   
   _scales(dims) {
