@@ -168,6 +168,7 @@ export default class Survey extends React.Component {
       doc.type = type 
       doc.selfTotal = selfTotal
       doc.otherTotal = otherTotal
+      doc.events = this.events
       return this.localDB.put(doc)
     }).then((res) => {
       return {svo, type}
