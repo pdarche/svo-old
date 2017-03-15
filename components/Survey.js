@@ -7,6 +7,13 @@ import Status from './Status'
 import Slider from './Slider'
 import Bar from './Bar'
 import Label from './Label'
+import { 
+  equality_points,
+  joint_gain_points,
+  other_gain,
+  own_gain,
+  max_distances
+} from '../config'
 
 export default class Survey extends React.Component {
   constructor(props){
@@ -32,6 +39,7 @@ export default class Survey extends React.Component {
     this.localDB = new PouchDB(db); 
     this.events = new Array()
     this.state = {
+      saving: false,
       question: 0,
       ranges: this.values[0],
       data: [85, 50],
@@ -82,9 +90,9 @@ export default class Survey extends React.Component {
     }
   }
 
-  computeSVO(selfTotal, otherTotal, denom) {
-    let selfAvg = (selfTotal / denom) - 50 
-    let otherAvg = (otherTotal / denom) - 50 
+  computeSVO(selfTotal, otherTotal) {
+    let selfAvg = (selfTotal / 6) - 50 
+    let otherAvg = (otherTotal / 6) - 50 
     let ratio = otherAvg / selfAvg
     let svo = Math.atan(ratio) * 180 / Math.PI
     return svo
@@ -128,13 +136,7 @@ export default class Survey extends React.Component {
   }
 
   saveAnswer() {
-    let selfTotal = this.state.selfTotal + this.state.data[0]
-    let otherTotal = this.state.otherTotal + this.state.data[1]
-    let svo = this.computeSVO(selfTotal, otherTotal, this.values.length)
-    let type = this.classifySVO(svo)
     let submitTime = new Date()
-    console.log('current svo', svo)
-    console.log('current class', type)
     let answer = {
       _id: hat(),
       sessionId: this.sessionId,
@@ -146,28 +148,85 @@ export default class Survey extends React.Component {
       resonseTime: submitTime - this.state.startTime,
       ranges: this.state.ranges
     }
-    // Post it to the database
-    this.localDB.get(this.sessionId).then((doc) => {
+    // Update the database
+    return this.localDB.get(this.sessionId).then((doc) => {
       doc.answers.push(answer)
-      doc.completedAt = new Date();
-      doc.svo = svo
-      doc.type = type 
-      doc.selfTotal = selfTotal
-      doc.otherTotal = otherTotal
-      doc.events = this.events
       return this.localDB.put(doc)
     })
     .catch(err => console.log(err));
   }
 
+  saveSVO() {
+    let selfTotal = this.state.selfTotal + this.state.data[0]
+    let otherTotal = this.state.otherTotal + this.state.data[1]
+    let svo = this.computeSVO(selfTotal, otherTotal)
+    let type = this.classifySVO(svo)
+
+    return this.localDB.get(this.sessionId).then((doc) => {
+      doc.completedAt = new Date();
+      doc.svo = svo
+      doc.type = type 
+      doc.selfTotal = selfTotal
+      doc.otherTotal = otherTotal
+      return this.localDB.put(doc)
+    }).then((res) => {
+      return {svo, type}
+    })
+    .catch(err => console.log(err));
+  }
+
+  computeSecondaryType(answers) {
+    let secondaryMeasures = answers.map((answer, ix) => {
+      let dia = Math.abs(answer.self - equality_points[ix]) / max_distances[ix]  
+      let djg = joint_gain_points[ix]  
+        ? Math.abs(answer.self - joint_gain_points[ix]) / max_distances[ix]
+        : 0
+      let dal = Math.abs(answer.self - other_gain[ix]) / max_distances[ix]
+      let dic = Math.abs(answer.self - own_gain[ix]) / max_distances[ix]
+      return [dia, djg, dal, dic]
+    })
+    let transposed = _.unzip(secondaryMeasures)
+    let [dia, djg, dal, dic] = transposed.map(a => _.sum(a) / 9)
+    let ia;
+    if (dia <= dal && dia <= dic && djg <= dal && djg <= dic) {
+      ia = dia / (dia + djg)
+    } else {
+      ia = "does not fit criteria"
+    }
+
+    return {ia, dia, djg, dal, dic}
+  }
+
+  saveSecondaryType() {
+    return this.localDB.get(this.sessionId).then((doc) => {
+      let answers = doc.answers.slice(6)
+      doc.secondaryMeasures = this.computeSecondaryType(answers)
+      return this.localDB.put(doc)
+    })
+    .catch(e => console.log(e))
+  }
+
   handleClick(ev) {
     ev.preventDefault();
     // Save the answer
-    this.saveAnswer();
-    // Update the state, if appropriate
+    this.saveAnswer().then((doc) => {
+      // take the next action 
+      this.nextAction()
+    })
+  }
+
+  nextAction() {
     let nextQuestion = this.state.question + 1;
-    if (nextQuestion !== this.values.length) {
-      // set the state for the next question
+    if (nextQuestion == 6) {
+      this.saveSVO().then((doc) => {
+        if (doc.type !== 'prosocial') {
+          // TODO:  add something to make sure it doesn't the next question
+          window.location = '/results'
+        }  
+      })
+    } 
+
+    if (nextQuestion != 15 && !this.state.saving) {
       let ranges = this.values[nextQuestion]
       this.setState({
         startTime: new Date(),
@@ -179,7 +238,12 @@ export default class Survey extends React.Component {
         otherTotal: this.state.otherTotal + this.state.data[1]
       });
     } else {
-      window.location = '/results'
+      // Compute and save the ia/jg type
+      // Redirect to the results page
+      this.saveSecondaryType().then((doc) => {
+        window.location = '/results'
+      })
+      .catch(e => console.log(e))
     }
   }
 
