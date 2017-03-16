@@ -50,24 +50,16 @@ export default class Survey extends React.Component {
   }
 
   componentDidMount() {
-    let user = window.localStorage.getItem('user')
-    if (user) {
-      user = JSON.parse(user)
-      this.createSession(user)
-    } else {
-      alert("Sorry, you have to log in first!")
-      window.location = '/'
-    }
+    this.createSession()
   }
 
-  createSession(user) {
+  createSession() {
     let id = hat()
     window.localStorage.setItem('sessionId', id)
     this.sessionId = id // TODO: move this to state
     // Create a new session
     this.localDB.put({
       _id: id,
-      user: user,
       answers: new Array(),
       startedAt: new Date(),
       events: new Array()

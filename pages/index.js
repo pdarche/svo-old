@@ -1,6 +1,7 @@
 import React from 'react'
 import Head from 'next/head'
 import css from 'next/css'
+import Link from 'next/link'
 import PouchDB from 'pouchdb'
 import hat from 'hat'
 import 'isomorphic-fetch'
@@ -134,7 +135,9 @@ export default class IndexPage extends React.Component {
           <p>The next page contains the tasks that make up the SVO.  Your job is to move each of the sliders to the allocation between you and some other person that you most prefer. There are no right or wrong answers, this is all about personal preferences.</p>
           <p>Ready to find out your SVO?  Click the button below to take the survey!</p>
           </div>
-          <div {...button} onClick={(ev) => {this.login(ev)}}>Go to the survey</div>
+          <div {...button}>
+            <Link prefetch href="/survey">Go to the survey!</Link>
+          </div>
         </div>
       </div>
     )
@@ -184,6 +187,13 @@ const button = css({
   justifyContent: 'center',
   textAlign: 'center',
   borderRadius: '10px',
+  '& a': {
+    padding: '30px',
+    font: "14px sans-serif",
+    color: "white",
+    margin: '0px auto',
+    textDecoration: 'none'
+  },
   ':hover': {
     cursor: 'pointer'
   }
