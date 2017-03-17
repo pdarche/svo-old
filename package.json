@@ -21,6 +21,7 @@
     "pouchdb": "^6.1.2",
     "pouchdb-all-dbs": "^1.0.2",
     "react-ga": "^2.1.2",
-    "react-modal": "^1.6.5"
+    "react-modal": "^1.6.5",
+    "survey-react": "^0.12.3"
   }
 }

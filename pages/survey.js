@@ -1,18 +1,29 @@
 import React from 'react'
 import css from 'next/css'
+import Head from 'next/head'
 import ReactModal from 'react-modal'
 import ReactGA from 'react-ga' 
 import Nav from '../components/Nav'
 import Survey from '../components/Survey'
-import { ANALYTICS_TRACKING_ID } from '../config'
+import { ANALYTICS_TRACKING_ID, SURVEY_JSON } from '../config'
 
+let SurveyForm
+if (process.browser) {
+  SurveyForm = require('survey-react/survey.react.min') 
+  SurveyForm.Survey.cssType = "bootstrap"
+}
 
 export default class SurveyPage extends React.Component {
   constructor(props){
     super(props);
-    this.state = {acknowledged: false}
+    this.state = {
+      demoComplete: false,
+      acknowledged: false,
+      loadSurvey: false
+    }
     if (process.browser) {
       ReactGA.initialize(ANALYTICS_TRACKING_ID)
+      this.model = new SurveyForm.Model(SURVEY_JSON)
     } 
   }
 
@@ -20,6 +31,7 @@ export default class SurveyPage extends React.Component {
     const page = window.location.pathname;
     ReactGA.set({page: page})
     ReactGA.pageview(page)
+    this.setState({loadSurvey: true})
   }
 
   handleRequestClose(ev) {
@@ -34,6 +46,18 @@ export default class SurveyPage extends React.Component {
     this.setState({acknowledged: true})
   }
 
+  handleDemoSurveyCompletion(survey) {
+    ReactGA.event({
+      category: 'User',
+      action: 'Completed demographics survey'
+    });
+    window.localStorage.setItem(
+      'demoSurvey', 
+      JSON.stringify(survey.data)
+    )
+    this.setState({demoComplete: true})
+  }
+
   generateSurvey(){
     if (this.state.acknowledged) {
       return <Survey/>
@@ -43,24 +67,44 @@ export default class SurveyPage extends React.Component {
   }
 
   render() {
+    let demo
+    if (this.state.loadSurvey) {
+      demo = <SurveyForm.Survey 
+        model={this.model} 
+        css={{navigationButton: "btn btn-sm"}}
+        onComplete={(survey) => {this.handleDemoSurveyCompletion(survey)}} />
+    }
     let survey = this.generateSurvey()
+
     return (
-      <div {...styles}>
-        <Nav/>
-        <ReactModal 
-          isOpen={!this.state.acknowledged}
-          onRequestClose={(ev) => {this.handleRequestClose(ev)}}
-          contentLabel={'Modal'}
-          style={{content: content, overlay: overlay}}>
-          <h3>Instructions</h3>
-          <p>The following tasks involve allocating a payoff between you and another person.  You can think of the other person as someone you might encounter randomly on the street.  The person isn't especially well-off or especially needy and there's nothing otherwise special about the circumstances.</p>
-          <p> Your task is to adjust the slider below to the allocation between you and the other person that you most prefer.</p> 
-          <p>The numbers at the slider handle represent the current allocation.  The numbers at the end represent the range of possible allocations.  Once you've adjusted the slider to your preferred allocation press the Submit button.</p>
-          <div {...button} onClick={(ev) => {this.handleAcknowledgement(ev)}}>
-            Got it!
-          </div>
-        </ReactModal>
-        {survey}
+     <div> 
+        <Head>
+          <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap.css" /> 
+        </Head>
+        <div {...styles}>
+          <Nav/>
+          <ReactModal
+            isOpen={!this.state.demoComplete}
+            onRequestClose={(ev) => {this.handleRequestClose(ev)}}
+            contentLabel={'Modal'}
+            style={{content: content, overlay: overlay}}>
+              {demo}
+          </ReactModal>
+          <ReactModal 
+            isOpen={!this.state.acknowledged && this.state.demoComplete}
+            onRequestClose={(ev) => {this.handleRequestClose(ev)}}
+            contentLabel={'Modal'}
+            style={{content: content, overlay: overlay}}>
+            <h3>Ok! Let's measure your SVO</h3>
+            <p>The following tasks involve allocating a payoff between you and another person.  You can think of the other person as someone you might encounter randomly on the street.  The person isn't especially well-off or especially needy and there's nothing otherwise special about the circumstances.</p>
+            <p> Your task is to adjust the slider below to the allocation between you and the other person that you most prefer.</p> 
+            <p>The numbers at the slider handle represent the current allocation.  The numbers at the end represent the range of possible allocations.  Once you've adjusted the slider to your preferred allocation press the Submit button.</p>
+            <div {...button} onClick={(ev) => {this.handleAcknowledgement(ev)}}>
+              Got it!
+            </div>
+          </ReactModal>
+          {survey}
+        </div>
       </div>
     )
   }
@@ -74,6 +118,12 @@ const styles = css({
   height: '90vh'
 });
 
+const form = {
+  '& fieldset': {
+    border: '0px'
+  }
+}
+
 const overlay = {
   display: 'flex',
   justifyContent: 'center',
@@ -84,7 +134,7 @@ const overlay = {
 const content = {
   position: '',
   width: '450px',
-  height: '425px',
+  height: '500px',
   font: '18px sans-serif'
 }
 

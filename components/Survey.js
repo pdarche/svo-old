@@ -8,40 +8,24 @@ import Slider from './Slider'
 import Bar from './Bar'
 import Label from './Label'
 import { 
-  equality_points,
-  joint_gain_points,
-  other_gain,
-  own_gain,
-  max_distances
+  EQUALITY_POINTS,
+  JOINT_GAIN_POINTS,
+  OTHER_GAIN,
+  OWN_GAIN,
+  MAX_DISTANCES,
+  QUESTIONS
 } from '../config'
 
 export default class Survey extends React.Component {
   constructor(props){
     super(props);
-    this.values = [
-      {min1: 85, max1: 85.01, min2: 85, max2: 15},
-      {min1: 85, max1: 100, min2: 15, max2: 50},
-      {min1: 50, max1: 85, min2: 100, max2: 85},
-      {min1: 50, max1: 85, min2: 100, max2: 15},
-      {min1: 100, max1: 50, min2: 50, max2: 100},
-      {min1: 100, max1: 85, min2: 50, max2: 85},
-      {min1: 100, max1: 70, min2: 50, max2: 100},
-      {min1: 90, max1: 100, min2: 100, max2: 90},
-      {min1: 100, max1: 50, min2: 70, max2: 100},
-      {min1: 100, max1: 90, min2: 70, max2: 100},
-      {min1: 70, max1: 100, min2: 100, max2: 70},
-      {min1: 50, max1: 100, min2: 100, max2: 90},
-      {min1: 50, max1: 100, min2: 100, max2: 50},
-      {min1: 100, max1: 70, min2: 90, max2: 100},
-      {min1: 90, max1: 100, min2: 100, max2: 50},
-    ]
     let db = window.localStorage.getItem('db')
     this.localDB = new PouchDB(db); 
     this.events = new Array()
     this.state = {
       saving: false,
       question: 0,
-      ranges: this.values[0],
+      ranges: QUESTIONS[0],
       data: [85, 50],
       reset: false,
       selfTotal: 0,
@@ -50,22 +34,24 @@ export default class Survey extends React.Component {
   }
 
   componentDidMount() {
-    this.createSession()
+    let demoSurvey = window.localStorage.getItem('demoSurvey')
+    demoSurvey = JSON.parse(demoSurvey)
+    this.createSession(demoSurvey)
   }
 
-  createSession() {
+  createSession(demoSurvey) {
     let id = hat()
     window.localStorage.setItem('sessionId', id)
-    this.sessionId = id // TODO: move this to state
-    // Create a new session
     this.localDB.put({
       _id: id,
+      demoSurvey: demoSurvey,
       answers: new Array(),
       startedAt: new Date(),
       events: new Array()
     })
     // Set the start time for the first question
     this.setState({
+      sessionId: id,
       startTime: new Date()
     })
   }
@@ -95,7 +81,7 @@ export default class Survey extends React.Component {
     this.events.push({
       _id: hat(),
       question: this.state.question,
-      sessionId: this.sessionId,
+      sessionId: this.state.sessionId,
       category: 'Survey',
       type: 'Moved Slider', 
       occuredAt: new Date(),
@@ -131,7 +117,7 @@ export default class Survey extends React.Component {
     let submitTime = new Date()
     let answer = {
       _id: hat(),
-      sessionId: this.sessionId,
+      sessionId: this.state.sessionId,
       self: this.state.data[0],
       other: this.state.data[1],
       question: this.state.question,
@@ -141,7 +127,7 @@ export default class Survey extends React.Component {
       ranges: this.state.ranges
     }
     // Update the database
-    return this.localDB.get(this.sessionId).then((doc) => {
+    return this.localDB.get(this.state.sessionId).then((doc) => {
       doc.answers.push(answer)
       return this.localDB.put(doc)
     })
@@ -154,7 +140,7 @@ export default class Survey extends React.Component {
     let svo = this.computeSVO(selfTotal, otherTotal)
     let type = this.classifySVO(svo)
 
-    return this.localDB.get(this.sessionId).then((doc) => {
+    return this.localDB.get(this.state.sessionId).then((doc) => {
       doc.completedAt = new Date();
       doc.svo = svo
       doc.type = type 
@@ -170,12 +156,12 @@ export default class Survey extends React.Component {
 
   computeSecondaryType(answers) {
     let secondaryMeasures = answers.map((answer, ix) => {
-      let dia = Math.abs(answer.self - equality_points[ix]) / max_distances[ix]  
-      let djg = joint_gain_points[ix]  
-        ? Math.abs(answer.self - joint_gain_points[ix]) / max_distances[ix]
+      let dia = Math.abs(answer.self - EQUALITY_POINTS[ix]) / MAX_DISTANCES[ix]  
+      let djg = JOINT_GAIN_POINTS[ix]  
+        ? Math.abs(answer.self - JOINT_GAIN_POINTS[ix]) / MAX_DISTANCES[ix]
         : 0
-      let dal = Math.abs(answer.self - other_gain[ix]) / max_distances[ix]
-      let dic = Math.abs(answer.self - own_gain[ix]) / max_distances[ix]
+      let dal = Math.abs(answer.self - OTHER_GAIN[ix]) / MAX_DISTANCES[ix]
+      let dic = Math.abs(answer.self - OWN_GAIN[ix]) / MAX_DISTANCES[ix]
       return [dia, djg, dal, dic]
     })
     let transposed = _.unzip(secondaryMeasures)
@@ -191,7 +177,7 @@ export default class Survey extends React.Component {
   }
 
   saveSecondaryType() {
-    return this.localDB.get(this.sessionId).then((doc) => {
+    return this.localDB.get(this.state.sessionId).then((doc) => {
       let answers = doc.answers.slice(6)
       doc.secondaryMeasures = this.computeSecondaryType(answers)
       return this.localDB.put(doc)
@@ -220,7 +206,7 @@ export default class Survey extends React.Component {
     } 
 
     if (nextQuestion != 15 && !this.state.saving) {
-      let ranges = this.values[nextQuestion]
+      let ranges = QUESTIONS[nextQuestion]
       this.setState({
         startTime: new Date(),
         question: nextQuestion,
