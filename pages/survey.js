@@ -46,6 +46,18 @@ export default class SurveyPage extends React.Component {
     this.setState({acknowledged: true})
   }
 
+  handleDemoSurveyCompletion(survey) {
+    ReactGA.event({
+      category: 'User',
+      action: 'Completed demographics survey'
+    });
+    window.localStorage.setItem(
+      'demoSurvey', 
+      JSON.stringify(survey.data)
+    )
+    this.setState({demoComplete: true})
+  }
+
   generateSurvey(){
     if (this.state.acknowledged) {
       return <Survey/>
@@ -57,11 +69,10 @@ export default class SurveyPage extends React.Component {
   render() {
     let demo
     if (this.state.loadSurvey) {
-      let css = {navigationButton: "btn btn-sm"}
       demo = <SurveyForm.Survey 
         model={this.model} 
-        css={css}
-        onComplete={() => {this.setState({demoComplete: true})}} />
+        css={{navigationButton: "btn btn-sm"}}
+        onComplete={(survey) => {this.handleDemoSurveyCompletion(survey)}} />
     }
     let survey = this.generateSurvey()
 
@@ -79,7 +90,6 @@ export default class SurveyPage extends React.Component {
             style={{content: content, overlay: overlay}}>
               {demo}
           </ReactModal>
-
           <ReactModal 
             isOpen={!this.state.acknowledged && this.state.demoComplete}
             onRequestClose={(ev) => {this.handleRequestClose(ev)}}
